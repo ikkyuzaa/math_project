@@ -4,7 +4,7 @@ import './index.css';
 // ============================================================
 // API Configuration
 // ============================================================
-const API_URL = 'https://math-project-0g6r.onrender.com';
+const API_URL = 'https://math-project-0g6r.onrender.com/calculate';
 
 // ============================================================
 // Argand Diagram Component (SVG)
