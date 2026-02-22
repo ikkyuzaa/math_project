@@ -114,7 +114,10 @@ fn determine_quadrant(a: f64, b: f64) -> String {
 
 #[tokio::main]
 async fn main() {
-    // ตั้งค่า CORS — อนุญาตให้ Frontend (localhost:5173) เข้าถึง
+    // ตั้งค่า CORS สำหรับ Production (Vercel)
+    // อนุญาต origin ทั้งหมด (Any)
+    // อนุญาต Methods GET, POST และที่สำคัญคือ OPTIONS (สำหรับ Preflight request ของ Browser)
+    // อนุญาต Headers ทั้งหมด (Any) เพื่อรองรับ 'Content-Type': 'application/json'
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
@@ -123,10 +126,17 @@ async fn main() {
     // สร้าง Router
     let app = Router::new()
         .route("/calculate", post(calculate))
+        // ลำดับสำคัญมาก: .layer(cors) ต้องถูกเรียกใช้งาน 'หลังจาก' สร้าง routes เสร็จสิ้นทั้งหมด
+        // เพื่อให้ CorsLayer ครอบคลุม Preflight (OPTIONS) requests ที่เข้ามาที่ path ต่างๆ
         .layer(cors);
 
-    // เริ่ม Server ที่ port 3000
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    // ใช้ std::env::var("PORT") เพื่อดึงพอร์ตจากตัวแปรแวดล้อมที่ Render จ่ายให้, ตั้ง Default เป็น 3000
+    let port = std::env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse::<u16>()
+        .unwrap_or(3000);
+
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     println!("🚀 Rust Backend running at http://{}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
