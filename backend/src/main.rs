@@ -1,4 +1,4 @@
-use axum::{http::HeaderValue, routing::post, Json, Router};
+use axum::{http::Method, routing::post, Json, Router};
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use tower_http::cors::{Any, CorsLayer};
@@ -116,8 +116,8 @@ fn determine_quadrant(a: f64, b: f64) -> String {
 async fn main() {
     // ตั้งค่า CORS — อนุญาตให้ Frontend (localhost:5173) เข้าถึง
     let cors = CorsLayer::new()
-        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
-        .allow_methods(Any)
+        .allow_origin(Any)
+        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
         .allow_headers(Any);
 
     // สร้าง Router
